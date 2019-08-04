@@ -40,8 +40,6 @@ function SetupCanvas(){
             console.log(bullets);
         }
     });
-
-
     Render();
     
 }
@@ -126,6 +124,10 @@ class Ship {
     }
 }
 
+
+//TODO: collision explosion - start bullets in center and go outwards
+
+
 class Bullet{
     constructor(angle){
         this.visible = true;
@@ -201,8 +203,8 @@ function CircleCollision(p1x, p1y, r1, p2x, p2y, r2){
     //algo for checking intersection between circles
     radiusSum = r1 + r2;
     xDiff = p1x - p2x;
-    yDiff = p2y - p2y;
-    if(radiusSum > Math.sqrt((xDiff * yDiff) + (yDiff * yDiff))){
+    yDiff = p1y - p2y;
+    if(radiusSum > Math.sqrt((xDiff * xDiff) + (yDiff * yDiff))){
         //we have a collision
         return true;
     } else {
@@ -255,11 +257,58 @@ function Render(){
         ctx.fillStyle = 'white';
         ctx.font = '50px Arial';
         // center text on canvas
-        ctx.fillText('GAME OVER', canvasWidth /2 - 150, canvasHeight / 2);
+        ctx.fillText('GAME OVER', canvasWidth / 2 - 150, canvasHeight / 2);
+    }
+    //draw ships on screen
+    DrawLifeShips();
+
+    //check for collisions between ships and asteroids
+    if(asteroids.length !== 0){
+        for(let k = 0; k < asteroids.length; k++){
+            if(CircleCollision(ship.x, ship.y, 11, asteroids[k].x, asteroids[k].y, asteroids[k].collsionRadius)){
+                ship.x = canvasWidth / 2; 
+                ship.y = canvasHeight / 2;
+                ship.velX = 0;
+                ship.velY = 0;
+                lives -= 1; 
+            }
+        }
     }
 
-    ship.Update();
-    ship.Draw();
+    //check for collisions between bullets and asteroids
+    if(asteroids.length !== 0 && bullets.length != 0) {
+// changing the value of an array while looping through an array
+loop1:
+        for(let l = 0; l < asteroids.length; l++){
+            for(let m = 0; m < bullets.length; m++){
+                if(CircleCollision(bullets[m].x, bullets[m].y, 3, asteroids[l].x, asteroids[l].y, asteroids[l].collsionRadius)){
+                    //check for size of asteroid - if 1 it can be broken down
+                    if(asteroids[l].level === 1){
+                        //push 2 new smaller asteroids 
+                        asteroids.push(new Asteroid(asteroids[l].x - 5, asteroids[l].y-5, 25, 2, 22));
+                        asteroids.push(new Asteroid(asteroids[l].x + 5, asteroids[l].y+5, 25, 2, 22));
+                    } else  if(asteroids[l].level === 2){
+                        asteroids.push(new Asteroid(asteroids[l].x - 5, asteroids[l].y - 5, 15, 3, 12));
+                        asteroids.push(new Asteroid(asteroids[l].x + 5, asteroids[l].y + 5, 15, 3, 12));
+                }
+                //remove asteroid that was hit
+                asteroids.splice(l,1);
+                //remove bullet that hit asteroid
+                bullets.splice(m,1);
+                score += 20;
+                //break out of loop
+                break loop1;
+            }
+        }
+
+    }
+}
+
+    if(ship.visible){
+        ship.Update();
+        ship.Draw();
+    }
+    
 
     if(bullets.length !== 0){
         for(let i = 0; i < bullets.length; i++){
@@ -270,7 +319,8 @@ function Render(){
     if(asteroids.length !== 0){
         for(let j = 0; j < asteroids.length; j++){
             asteroids[j].Update();
-            asteroids[j].Draw();
+            //pass j to draw to track which asteroid points we want to store
+            asteroids[j].Draw(j);
         }
     }
 
