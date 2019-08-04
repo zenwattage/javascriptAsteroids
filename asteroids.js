@@ -19,6 +19,10 @@ function SetupCanvas(){
     //draw black rect on screen 
     ctx.fillRect(0,0,canvas.width, canvas.height);
     ship = new Ship();
+    //put asteroids on screen
+    for(let i = 0; i < 8; i ++){
+        asteroids.push(new Asteroid());
+    }
 
     //to handle multiple keypresses at the same time
     document.body.addEventListener("keydown", function(e){
@@ -26,6 +30,9 @@ function SetupCanvas(){
     });
     document.body.addEventListener("keyup", function(e){
         keys[e.keyCode] = false;
+        if(e.keyCode === 32) {
+            bullets.push(new Bullet(ship.angle));
+        }
     });
     Render();
     
@@ -47,7 +54,7 @@ class Ship {
         this.radius = 15;
         //starting angle of ship
         this.angle = 0;
-        this.strokeColor = 'blue';
+        this.strokeColor = 'white';
         this.noseX = canvasWidth / 2 + 15;
         this.nosey = canvasHeight / 2;
     }
@@ -65,7 +72,7 @@ class Ship {
         //oldY + sin(radians) * distance
         if(this.movingForward){
             this.velX += Math.cos(radians) * this.speed;
-            this.vely += Math.sin(radians) * this.speed;
+            this.velY += Math.sin(radians) * this.speed;
         }
         if(this.x < this.radius){
             this.x = canvas.width;
@@ -117,7 +124,7 @@ class Bullet {
         this.velY = 0;
     }
     Update(){
-        let radians = this.angle / Math.PI * 180;
+        var radians = this.angle / Math.PI * 180;
         this.x -= Math.cos(radians) * this.speed;
         this.y -= Math.sin(radians) * this.speed;
     }
@@ -180,6 +187,20 @@ function Render(){
     ctx.clearRect(0,0,canvasWidth,canvasHeight);
     ship.Update();
     ship.Draw();
+
+    if(bullets.length !== 0){
+        for(let i = 0; i < bullets.length; i++){
+            bullets[i].Update();
+            bullets[i].Draw();
+        }
+    }
+    if(asteroids.length !== 0){
+        for(let j = 0; j < asteroids.length; j++){
+            asteroids[j].Update();
+            asteroids[j].Draw();
+        }
+    }
+
     requestAnimationFrame(Render);
 
 }
