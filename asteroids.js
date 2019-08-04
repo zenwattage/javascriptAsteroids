@@ -1,7 +1,7 @@
 let canvas;
 let ctx;
-let canvasWidth = 1400;
-let canvasHeight = 1000;
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
 let ship;
 //in order to be able to press multiple keys at the same time and regester the key presses to the game the keys need to be put into an array
 let keys = [];
@@ -159,6 +159,7 @@ class Asteroid{
         this.speed = 5;
         this.radius = radius || 50;
         this.angle = Math.floor(Math.random() * 359);
+        this.strokeStyle = "#FF00000";
         this.strokeColor = 'white';
         this.collsionRadius = collsionRadius || 46;
         this.level = level || 1; 
