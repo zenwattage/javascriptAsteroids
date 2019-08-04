@@ -19,6 +19,7 @@ function SetupCanvas(){
     //draw black rect on screen 
     ctx.fillRect(0,0,canvas.width, canvas.height);
     ship = new Ship();
+
     //put asteroids on screen
     for(let i = 0; i < 8; i ++){
         asteroids.push(new Asteroid());
@@ -31,9 +32,13 @@ function SetupCanvas(){
     document.body.addEventListener("keyup", function(e){
         keys[e.keyCode] = false;
         if(e.keyCode === 32) {
+            console.log(e.keyCode);
             bullets.push(new Bullet(ship.angle));
+            console.log(bullets);
         }
     });
+
+
     Render();
     
 }
@@ -46,21 +51,26 @@ class Ship {
         this.y = canvasHeight / 2;
         //start ship stationary
         this.movingForward = false;
+        //set
         this.speed = 0.1;
         // velocity that ship moves across the screen
         this.velX = 0;
         this.velY = 0;
-        this.rotationSpeed = 0.001;
+        this.rotateSpeed = 0.001;
         this.radius = 15;
         //starting angle of ship
         this.angle = 0;
         this.strokeColor = 'white';
+        //bullet comes from nose of ship
         this.noseX = canvasWidth / 2 + 15;
-        this.nosey = canvasHeight / 2;
+        this.noseY = canvasHeight / 2;
     }
+
+    
     //rotate the ship
     Rotate(dir){
-        this.angle += this.rotationSpeed * dir;
+        this.angle += this.rotateSpeed * dir;
+        //console.log(this.angle);
     }
     //handle rotating and moving ship arround
     Update() {
@@ -99,10 +109,12 @@ class Ship {
         ctx.beginPath();
         //calc angle between the vertices of the ship
         let vertAngle = ((Math.PI * 2) / 3);
+
         let radians = this.angle / Math.PI * 180;
         //find nose to fire bullets from
         this.noseX = this.x - this.radius * Math.cos(radians);
         this.noseY = this.y - this.radius * Math.sin(radians);
+
         for(let i = 0; i < 3; i++){
             ctx.lineTo(this.x - this.radius * Math.cos(vertAngle * i + radians), this.y - this.radius * Math.sin(vertAngle * i + radians));
         }
@@ -111,8 +123,8 @@ class Ship {
     }
 }
 
-class Bullet {
-    constuctor(angle){
+class Bullet{
+    constructor(angle){
         this.visible = true;
         this.x = ship.noseX;
         this.y = ship.noseY;
@@ -124,13 +136,13 @@ class Bullet {
         this.velY = 0;
     }
     Update(){
-        var radians = this.angle / Math.PI * 180;
+        let radians = this.angle / Math.PI * 180;
         this.x -= Math.cos(radians) * this.speed;
         this.y -= Math.sin(radians) * this.speed;
     }
     Draw(){
         ctx.fillStyle = 'white';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillRect(this.x,this.y,this.width,this.height);
     }
 }
 
@@ -178,13 +190,17 @@ class Asteroid{
 //update position of all shapes on screen and model them
 function Render(){
     ship.movingForward = (keys[87]);
+
+    // d key to rotate right
     if(keys[68]){
         ship.Rotate(1);
     }
+    // a key to rotate left
     if(keys[65]){
         ship.Rotate(-1);
     }
     ctx.clearRect(0,0,canvasWidth,canvasHeight);
+
     ship.Update();
     ship.Draw();
 
