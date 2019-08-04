@@ -7,6 +7,9 @@ let ship;
 let keys = [];
 let bullets = [];
 let asteroids = [];
+let score = 0;
+let lives = 3;
+
 
 document.addEventListener('DOMContentLoaded', SetupCanvas);
 
@@ -147,14 +150,16 @@ class Bullet{
 }
 
 class Asteroid{
-    constructor(x, y){
+    constructor(x, y,radius,level,collsionRadius){
         this.visible = true;
-        this.x = Math.floor(Math.random() * canvasWidth);
-        this.y = Math.floor(Math.random() * canvasHeight);
-        this.speed = 1;
-        this.radius = 50;
+        this.x = x || Math.floor(Math.random() * canvasWidth);
+        this.y = y || Math.floor(Math.random() * canvasHeight);
+        this.speed = 5;
+        this.radius = radius || 50;
         this.angle = Math.floor(Math.random() * 359);
         this.strokeColor = 'white';
+        this.collsionRadius = collsionRadius || 46;
+        this.level = level || 1; 
     }
     Update() {
         var radians = this.angle / Math.PI * 180;
@@ -187,6 +192,44 @@ class Asteroid{
     }
 }
 
+
+function CircleCollision(p1x, p1y, r1, p2x, p2y, r2){
+    //if 2 circles collide
+    let radiusSum;
+    let xDiff;
+    let yDiff;
+    //algo for checking intersection between circles
+    radiusSum = r1 + r2;
+    xDiff = p1x - p2x;
+    yDiff = p2y - p2y;
+    if(radiusSum > Math.sqrt((xDiff * yDiff) + (yDiff * yDiff))){
+        //we have a collision
+        return true;
+    } else {
+        //no collision
+        return false;
+    }
+}
+
+function DrawLifeShips(){
+    let startX = 1350;
+    let startY = 10;
+    let points = [[9,9], [-9,9]];
+    ctx.strokeStyle = 'white';
+    //cycle through remaining ships
+    for(let i = 0; i < lives; i++){
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        for(let j = 0; j < points.length; j++){
+            ctx.lineTo(startX + points[j][0], startY + points[j][1]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        startX -= 30;
+    }
+}
+
+
 //update position of all shapes on screen and model them
 function Render(){
     ship.movingForward = (keys[87]);
@@ -200,6 +243,20 @@ function Render(){
         ship.Rotate(-1);
     }
     ctx.clearRect(0,0,canvasWidth,canvasHeight);
+
+    //display to user
+    ctx.fillStyle = 'white';
+    ctx.font = '21px Arial';
+    // convert to string and give x and y coord
+    ctx.fillText('SCORE: ' + score.toString(), 20, 35);
+    
+    if(lives <= 0) {
+        ship.visible = false;
+        ctx.fillStyle = 'white';
+        ctx.font = '50px Arial';
+        // center text on canvas
+        ctx.fillText('GAME OVER', canvasWidth /2 - 150, canvasHeight / 2);
+    }
 
     ship.Update();
     ship.Draw();
