@@ -1,2 +1,2 @@
 # javascriptAsteroids
-Building my mom's favorite game with pure JS
+Building my Mom played while she was pregnant with me... in pure JS!
